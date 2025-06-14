@@ -134,28 +134,28 @@ namespace Sharp
                     BASSError errcode = Bass.BASS_ErrorGetCode();
                     BassWasapi.BASS_WASAPI_Free();
                     Free();
-                    throw new Exception($"BASSミキサ(mixing)の作成に失敗しました。[{errcode}]");
+                    throw new Exception($"BASSミキサーの作成に失敗しました。[{errcode}]");
                 }
                 _mixer_deviceOut = BassMix.BASS_Mixer_StreamCreate(info.freq, info.chans, BASSFlag.BASS_SAMPLE_FLOAT | BASSFlag.BASS_STREAM_PRESCAN | BASSFlag.BASS_STREAM_DECODE);
                 if (_mixer_deviceOut == 0)
                 {
                     BASSError errcode2 = Bass.BASS_ErrorGetCode();
                     Free();
-                    throw new Exception($"BASSミキサ(最終段)の作成に失敗しました。[{errcode2}]");
+                    throw new Exception($"BASSミキサー（出力用）の作成に失敗しました。[{errcode2}]");
                 }
                 if (!BassMix.BASS_Mixer_StreamAddChannel(_mixer_deviceOut, Mixer, BASSFlag.BASS_DEFAULT))
                 {
                     BASSError errcode3 = Bass.BASS_ErrorGetCode();
                     BassWasapi.BASS_WASAPI_Free();
                     Free();
-                    throw new Exception($"BASSミキサ(最終段とmixing)の接続に失敗しました。[{errcode3}]");
+                    throw new Exception($"BASSミキサーの接続に失敗しました。[{errcode3}]");
                 }
                 BassWasapi.BASS_WASAPI_Start();
                 return;
             }
             BASSError errcode4 = Bass.BASS_ErrorGetCode();
             Free();
-            throw new Exception($"BASS (WASAPI) の初期化に失敗しました。(BASS_WASAPI_Init)[{errcode4}]");
+            throw new Exception($"BASS (WASAPI) の初期化に失敗しました。[{errcode4}]");
         }
 
         /// <summary>
@@ -171,12 +171,12 @@ namespace Sharp
 
         private static int WasapiProc(nint buffer, int length, nint user)
         {
-            int num = Bass.BASS_ChannelGetData(_mixer_deviceOut, buffer, length);
-            if (num == -1)
+            int bytesRead = Bass.BASS_ChannelGetData(_mixer_deviceOut, buffer, length);
+            if (bytesRead == -1)
             {
-                num = 0;
+                bytesRead = 0;
             }
-            return num;
+            return bytesRead;
         }
     }
 }

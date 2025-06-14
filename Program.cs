@@ -12,6 +12,7 @@ class Program
     {
         Audio audio = null;
         Texture texture = null;
+        Nuunlm nuunlm = null;
 
         Sharp.Sharp.Init(
             beforeInit: () =>
@@ -20,8 +21,11 @@ class Program
             },
             afterInit: () =>
             {
-                audio = new Audio("メドレー「淫夢MAD」.ogg", true, 160, 170);
+                audio = new Audio("メドレー「淫夢MAD」.ogg", true);
                 texture = new Texture("elephant_1f418.png");
+                nuunlm = new Nuunlm();
+                nuunlm.Load("donbg_a_06_1p\\donbg_a_06_1p.nuunlm");
+                nuunlm.Start(true);
             },
             WindowSize: new Vector2(1280, 720),
             SceneSize: new Vector2(1920, 1080),
@@ -37,8 +41,8 @@ class Program
                     audio?.PlayOneShot();
                 }
 
+                nuunlm.Update();
                 Raylib.ClearBackground(Color.RayWhite);
-                Raylib.DrawText("FPS : " + Raylib.GetFPS(), 12, 12, 20, Color.Black);
 
                 // スケール0.8倍、透明度125のテクスチャを中心に描画
                 texture.Scaled(0.8).Colored(125).DrawAt(0, 0);
@@ -47,12 +51,17 @@ class Program
                 texture.Scaled(0.5);
                 texture.Colored(255);
                 texture.Origined(ReferencePoint.TopRight);
-                texture.Blended(BlendState.Additive);
-                texture.Draw(300, 100);
-                texture.Blended(BlendState.Alpha);
 
                 // スケール0.5倍、透明度255のテクスチャを左上原点で、右上基準(600,100)に描画 (色を赤に) Coloredは(RGBA)
                 texture.Scaled(0.5).Colored(255, 0, 0, 255).Origined(ReferencePoint.TopRight).Draw(600, 100);
+
+                for(int i = 0; i < 20; i++)
+                {
+                    nuunlm.Draw(0, i * 4);
+                }
+
+                Raylib.DrawText("FPS : " + Raylib.GetFPS(), 12, 12, 20, Color.Black);
+
             });
         }
     }

@@ -1,40 +1,46 @@
 ﻿using Raylib_cs;
+using System.Diagnostics;
 using System.Numerics;
+using System.Runtime.InteropServices;
 
 namespace Sharp
 {
     public static class Sharp
     {
+        public static int WindowWidth; // ウィンドウのサイズ
+        public static int WindowHeight;
+        public static int SceneWidth; // ゲームの基本解像度
+        public static int SceneHeight;
+
         private static RenderTexture2D target;
         private static bool _isFullScreen = false;
         private static int _monitorWidth; // モニターのサイズ
         private static int _monitorHeight;
-        private static int _windowWidth; // ウィンドウのサイズ
-        private static int _windowHeight;
-        private static int _sceneWidth; // ゲームの基本解像度
-        private static int _scenelHeight;
 
         /// <summary>
         /// Sharp と Raylibの初期化をする。必ず Sharp の使用前に呼び出す必要がある。
         /// </summary>
-        public static void Init(Action beforeInit, Action afterInit, Vector2 WindowSize, Vector2 SceneSize, string WindowTitle)
+        public static void Init(Action beforeInit, Action afterInit, Vector2 WindowSize, Vector2 SceneSize, string WindowTitle, bool isWasapiExclusive = false)
         {
+            SetProcessPriority(); // プロセスの優先度を設定する
+            DisablePowerSavingMode(); // 電源管理を無効にする
+
             beforeInit?.Invoke();
 
-            _windowWidth = (int)WindowSize.X;
-            _windowHeight = (int)WindowSize.Y;
-            Raylib.InitWindow(_windowWidth, _windowHeight, WindowTitle);
+            WindowWidth = (int)WindowSize.X;
+            WindowHeight = (int)WindowSize.Y;
+            Raylib.InitWindow(WindowWidth, WindowHeight, WindowTitle);
 
-            _sceneWidth = (int)SceneSize.X;
-            _scenelHeight = (int)SceneSize.Y;
-            target = Raylib.LoadRenderTexture(_sceneWidth, _scenelHeight);
+            SceneWidth = (int)SceneSize.X;
+            SceneHeight = (int)SceneSize.Y;
+            target = Raylib.LoadRenderTexture(SceneWidth, SceneHeight);
             Raylib.SetTextureFilter(target.Texture, TextureFilter.Bilinear);
 
             int monitor = Raylib.GetCurrentMonitor();
             _monitorWidth = Raylib.GetMonitorWidth(monitor);
             _monitorHeight = Raylib.GetMonitorHeight(monitor);
 
-            AudioManager.Init();
+            AudioManager.Init(isWasapiExclusive);
 
             afterInit?.Invoke();
         }
@@ -54,16 +60,15 @@ namespace Sharp
         /// </summary>
         public static void Loop(Action drawAction)
         {
+            AudioManager.Update();
             if (Raylib.IsKeyPressed(KeyboardKey.F11) || Raylib.IsKeyPressed(KeyboardKey.Enter) && (Raylib.IsKeyDown(KeyboardKey.LeftAlt) || Raylib.IsKeyDown(KeyboardKey.RightAlt)))
             {
                 ToggleFullScreen();
             }
 
-            AudioManager.Update();
-
             // ゲームの基本解像度とモニターのサイズが一緒かつ、フルスクリーンの場合は仮想画面を使わずに直接描画する。
             // それ以外の場合は仮想画面に一旦描画してからスケーリングしてウィンドウに描画する。
-            if (_isFullScreen && (_monitorWidth == _sceneWidth && _monitorHeight == _scenelHeight))
+            if (_isFullScreen && (_monitorWidth == SceneWidth && _monitorHeight == SceneHeight))
             {
                 Raylib.BeginDrawing();
                 Raylib.ClearBackground(Color.Black);
@@ -90,14 +95,14 @@ namespace Sharp
         /// </summary>
         private static void DrawWindow(RenderTexture2D target)
         {
-            float scale = Math.Min((float)Raylib.GetScreenWidth() / _sceneWidth, (float)Raylib.GetScreenHeight() / _scenelHeight);
+            float scale = Math.Min((float)Raylib.GetScreenWidth() / SceneWidth, (float)Raylib.GetScreenHeight() / SceneHeight);
 
-            Rectangle source = new Rectangle(0, 0, _sceneWidth, -_scenelHeight); // 上下反転
+            Rectangle source = new Rectangle(0, 0, SceneWidth, -SceneHeight); // 上下反転
             Rectangle dest = new Rectangle(
-                (Raylib.GetScreenWidth() - _sceneWidth * scale) * 0.5f,
-                (Raylib.GetScreenHeight() - _scenelHeight * scale) * 0.5f,
-                _sceneWidth * scale,
-                _scenelHeight * scale
+                (Raylib.GetScreenWidth() - SceneWidth * scale) * 0.5f,
+                (Raylib.GetScreenHeight() - SceneHeight * scale) * 0.5f,
+                SceneWidth * scale,
+                SceneHeight * scale
             );
 
             Raylib.DrawTexturePro(target.Texture, source, dest, Vector2.Zero, 0, Color.White);
@@ -111,7 +116,7 @@ namespace Sharp
             if (_isFullScreen)
             {
                 Raylib.ToggleBorderlessWindowed();
-                Raylib.SetWindowSize(_windowWidth, _windowHeight);
+                Raylib.SetWindowSize(WindowWidth, WindowHeight);
             }
             else
             {
@@ -121,6 +126,26 @@ namespace Sharp
 
             _isFullScreen = !_isFullScreen;
         }
+
+        /// <summary>
+        /// プロセスの優先度を設定する。
+        /// </summary>
+        private static void SetProcessPriority()
+        {
+            Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.High;
+        }
+
+        /// <summary>
+        /// 電源管理を無効にする。
+        /// </summary>
+        private static void DisablePowerSavingMode()
+        {
+            PowerSetActiveScheme(IntPtr.Zero, IntPtr.Zero);
+        }
+
+        [DllImport("powrprof.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.U1)]
+        internal static extern bool PowerSetActiveScheme(nint UserRootPowerKey, nint ActivePolicyGuid);
         #endregion
     }
 }

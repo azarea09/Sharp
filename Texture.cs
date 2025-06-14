@@ -19,7 +19,8 @@ namespace Sharp
         private Color _color;
         private ReferencePoint _referencePoint;
         private Rectangle? _sourceRect = null;
-        private BlendState _blendState;
+        private BlendState _nowBlendState;
+        private BlendState _prevBlendState;
 
 
         public double GetScaleX() => _scaleX;
@@ -35,7 +36,8 @@ namespace Sharp
             _scaleX = 1.0;
             _scaleY = 1.0;
             _referencePoint = ReferencePoint.TopLeft;
-            _blendState = BlendState.Alpha;
+            _nowBlendState = BlendState.Alpha;
+            _prevBlendState = BlendState.Alpha;
             _color = Color.White;
         }
 
@@ -111,7 +113,7 @@ namespace Sharp
 
         public Texture Blended(BlendState blendState)
         {
-            this._blendState = blendState;
+            this._nowBlendState = blendState;
             return this;
         }
 
@@ -123,70 +125,61 @@ namespace Sharp
         {
             if (!IsEnable) return;
 
-            Raylib_cs.Rectangle source;
-
-            if (_sourceRect != null)
-            {
-                source = new Raylib_cs.Rectangle(_sourceRect.Value.X, _sourceRect.Value.Y, _sourceRect.Value.Width, _sourceRect.Value.Height);
-            }
-            else
-            {
-                source = new Raylib_cs.Rectangle(0, 0, RayTexture.Width, RayTexture.Height);
-            }
+            var sourceRect = _sourceRect is Rectangle sr
+                ? new Raylib_cs.Rectangle(sr.X, sr.Y, sr.Width, sr.Height)
+                : new Raylib_cs.Rectangle(0, 0, RayTexture.Width, RayTexture.Height);
 
             // 反転処理
-            if (_reversedX) source.Width = -source.Width;
-            if (_reversedY) source.Height = -source.Height;
-            Vector2 origin = drawOrigin ?? GetReferencePoint(source);
-            // スケールを考慮したオリジン調整
-            origin.X *= (float)_scaleX;
-            origin.Y *= (float)_scaleY;
-            Raylib_cs.Color color = new Raylib_cs.Color(_color.R, _color.G, _color.B, _color.A);
+            if (_reversedX) sourceRect.Width = -sourceRect.Width;
+            if (_reversedY) sourceRect.Height = -sourceRect.Height;
 
-            switch (_blendState)
+            // 色の変換
+            var color = new Raylib_cs.Color(_color.R, _color.G, _color.B, _color.A);
+
+            // origin の算出とスケール考慮
+            Vector2 origin;
+            if (drawOrigin.HasValue)
             {
-                case BlendState.Alpha:
-                    Rlgl.SetBlendFactorsSeparate(
-                        Rlgl.SRC_ALPHA,
-                        Rlgl.ONE_MINUS_SRC_ALPHA,
-                        Rlgl.ONE,
-                        Rlgl.ONE_MINUS_SRC_ALPHA,
-                        Rlgl.FUNC_ADD,
-                        Rlgl.MAX
-                        );
-                    break;
-                case BlendState.Additive:
-                    Rlgl.SetBlendFactorsSeparate(
-                        Rlgl.SRC_ALPHA,
-                        Rlgl.ONE,
-                        Rlgl.SRC_ALPHA,
-                        Rlgl.ONE,
-                        Rlgl.FUNC_ADD,
-                        Rlgl.MAX
-                        );
-                    break;
-                case BlendState.Subtract:
-                    Rlgl.SetBlendFactorsSeparate(
-                        Rlgl.SRC_ALPHA,
-                        Rlgl.ONE,
-                        Rlgl.SRC_ALPHA,
-                        Rlgl.ONE,
-                        Rlgl.FUNC_REVERSE_SUBTRACT,
-                        Rlgl.MAX
-                        );
-                    break;
-            }
-
-            Rlgl.SetBlendMode(BlendMode.CustomSeparate);
-
-
-            if (_scaleX == 1 && _scaleY == 1 && _rotation == 0)
-            {
-                Raylib.DrawTextureRec(RayTexture, source, new Vector2((float)x - origin.X, (float)y - origin.Y), color);
+                origin = drawOrigin.Value;
+                origin.X *= (float)_scaleX;
+                origin.Y *= (float)_scaleY;
             }
             else
             {
-                Raylib.DrawTexturePro(RayTexture, source, new Raylib_cs.Rectangle((float)x, (float)y, source.Width * (float)_scaleX, source.Height * (float)_scaleY), origin, (float)_rotation, color);
+                origin = GetReferencePoint(sourceRect);
+                origin.X *= (float)_scaleX;
+                origin.Y *= (float)_scaleY;
+            }
+
+            if (_nowBlendState != _prevBlendState)
+            {
+                switch (_prevBlendState)
+                {
+                    case BlendState.Alpha:
+                        Rlgl.SetBlendFactorsSeparate(Rlgl.SRC_ALPHA, Rlgl.ONE_MINUS_SRC_ALPHA, Rlgl.ONE, Rlgl.ONE_MINUS_SRC_ALPHA, Rlgl.FUNC_ADD, Rlgl.MAX);
+                        break;
+                    case BlendState.Additive:
+                        Rlgl.SetBlendFactorsSeparate(Rlgl.SRC_ALPHA, Rlgl.ONE, Rlgl.SRC_ALPHA, Rlgl.ONE, Rlgl.FUNC_ADD, Rlgl.MAX);
+                        break;
+                    case BlendState.Subtract:
+                        Rlgl.SetBlendFactorsSeparate(Rlgl.SRC_ALPHA, Rlgl.ONE, Rlgl.SRC_ALPHA, Rlgl.ONE, Rlgl.FUNC_REVERSE_SUBTRACT, Rlgl.MAX);
+                        break;
+                }
+                Rlgl.SetBlendMode(BlendMode.CustomSeparate);
+                // ブレンド状態が変わった場合は、前の状態を保存
+                _prevBlendState = _nowBlendState;
+            }
+
+            bool isSimpleDraw = _scaleX == 1.0 && _scaleY == 1.0 && _rotation == 0.0;
+
+            if (isSimpleDraw)
+            {
+                Raylib.DrawTextureRec(RayTexture, sourceRect, new Vector2((float)x - origin.X, (float)y - origin.Y), color);
+            }
+            else
+            {
+                var destRect = new Raylib_cs.Rectangle((float)x, (float)y, sourceRect.Width * (float)_scaleX, sourceRect.Height * (float)_scaleY);
+                Raylib.DrawTexturePro(RayTexture, sourceRect, destRect, origin, (float)_rotation, color);
             }
         }
 
