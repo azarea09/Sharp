@@ -3,13 +3,12 @@
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
 		<TargetFramework>net8.0</TargetFramework>
-		<PublishAot>true</PublishAot>
-		<OptimizationPreference>Speed</OptimizationPreference>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<StripSymbols>true</StripSymbols>
 		<ReadyToRun>true</ReadyToRun>
 		<PublishReadyToRun>true</PublishReadyToRun>
+		<CETCompat>false</CETCompat>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)' == 'Debug'">

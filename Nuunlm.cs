@@ -96,12 +96,11 @@ public class Nuunlm
         };
     }
 }
-
 struct AnimationData
 {
     public List<FrameData> nuunlm { get; set; }
-    public List<string> TextureFileNames;
-    public int FrameLength;
+    public List<string> TextureFileNames { get; set; }
+    public int FrameLength { get; set; }
 }
 
 struct FrameData
