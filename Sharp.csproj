@@ -38,4 +38,9 @@
       </None>
 	</ItemGroup>
 
+	<PropertyGroup>
+		<BaseOutputPath>$(SolutionDir)bin\</BaseOutputPath>
+		<BaseIntermediateOutputPath>$(SolutionDir)obj\</BaseIntermediateOutputPath>
+	</PropertyGroup>
+
 </Project>
