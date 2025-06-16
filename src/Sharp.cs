@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.InteropServices;
 
-namespace Sharp
+namespace SharpEngine
 {
     public static class Sharp
     {
@@ -78,16 +78,24 @@ namespace Sharp
             else
             {
                 Raylib.BeginTextureMode(target);
+                Raylib.ClearBackground(Color.Black);
                 drawAction?.Invoke();
                 Raylib.EndTextureMode();
 
                 Raylib.BeginDrawing();
-                Raylib.ClearBackground(Color.Black);
                 DrawWindow(target);
                 Raylib.EndDrawing();
             }
         }
 
+        /// <summary>
+        /// アルファブレンドにリセットします。
+        /// </summary>
+        public static void ResetAlphaBlend()
+        {
+            Rlgl.SetBlendFactorsSeparate(Rlgl.SRC_ALPHA, Rlgl.ONE_MINUS_SRC_ALPHA, Rlgl.ONE, Rlgl.ONE_MINUS_SRC_ALPHA, Rlgl.FUNC_ADD, Rlgl.MAX);
+            Rlgl.SetBlendMode(BlendMode.CustomSeparate);
+        }
 
         #region [private]
         /// <summary>
@@ -105,6 +113,8 @@ namespace Sharp
                 SceneHeight * scale
             );
 
+            Rlgl.SetBlendFactorsSeparate(Rlgl.SRC_ALPHA, Rlgl.ONE_MINUS_SRC_ALPHA, Rlgl.ONE, Rlgl.ONE_MINUS_SRC_ALPHA, Rlgl.FUNC_ADD, Rlgl.MAX);
+            Rlgl.SetBlendMode(BlendMode.CustomSeparate);
             Raylib.DrawTexturePro(target.Texture, source, dest, Vector2.Zero, 0, Color.White);
         }
 

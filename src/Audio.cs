@@ -3,7 +3,7 @@ using Un4seen.Bass;
 using Un4seen.Bass.AddOn.Fx;
 using Un4seen.Bass.AddOn.Mix;
 
-namespace Sharp
+namespace SharpEngine
 {
     /// <summary>
     /// BASSライブラリを用いた音声再生と制御を行うクラス

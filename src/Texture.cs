@@ -1,9 +1,10 @@
 ﻿using Raylib_cs;
+using System.Drawing;
 using System.Numerics;
 using Color = System.Drawing.Color;
 using Rectangle = System.Drawing.Rectangle;
 
-namespace Sharp
+namespace SharpEngine
 {
     public class Texture : IDisposable
     {
@@ -19,8 +20,7 @@ namespace Sharp
         private Color _color;
         private ReferencePoint _referencePoint;
         private Rectangle? _sourceRect = null;
-        private BlendState _nowBlendState;
-        private BlendState _prevBlendState;
+        private BlendState _blendState;
 
 
         public double GetScaleX() => _scaleX;
@@ -36,8 +36,7 @@ namespace Sharp
             _scaleX = 1.0;
             _scaleY = 1.0;
             _referencePoint = ReferencePoint.TopLeft;
-            _nowBlendState = BlendState.Alpha;
-            _prevBlendState = BlendState.Alpha;
+            _blendState = BlendState.Alpha;
             _color = Color.White;
         }
 
@@ -47,8 +46,18 @@ namespace Sharp
             if (RayTexture.Id != 0)
             {
                 IsEnable = true;
+                FileName = fileName;
             }
-            FileName = fileName;
+        }
+
+        public Texture(RenderTexture2D renderTexture2D) : this()
+        {
+            RayTexture = renderTexture2D.Texture;
+            if (RayTexture.Id != 0)
+            {
+                IsEnable = true;
+                _reversedY = true;
+            }
         }
 
         public void Dispose()
@@ -93,15 +102,21 @@ namespace Sharp
             return this;
         }
 
+        public Texture Colored(Color color, double opacity)
+        {
+            this._color = Color.FromArgb((int)opacity, color.R, color.G, color.B);
+            return this;
+        }
+
         public Texture Colored(int r, int g, int b, int a)
         {
             this._color = Color.FromArgb(a, r, g, b);
             return this;
         }
 
-        public Texture Colored(int a)
+        public Texture Colored(double opacity)
         {
-            this._color = Color.FromArgb(a, 255, 255, 255);
+            this._color = Color.FromArgb((int)opacity, 255, 255, 255);
             return this;
         }
 
@@ -113,7 +128,7 @@ namespace Sharp
 
         public Texture Blended(BlendState blendState)
         {
-            this._nowBlendState = blendState;
+            this._blendState = blendState;
             return this;
         }
 
@@ -134,7 +149,7 @@ namespace Sharp
             if (_reversedY) sourceRect.Height = -sourceRect.Height;
 
             // 色の変換
-            var color = new Raylib_cs.Color(_color.R, _color.G, _color.B, _color.A);
+            var color = new Raylib_cs.Color(_color.R / 255f, _color.G / 255f, _color.B / 255f, _color.A / 255f);
 
             // origin の算出とスケール考慮
             Vector2 origin;
@@ -151,24 +166,22 @@ namespace Sharp
                 origin.Y *= (float)_scaleY;
             }
 
-            if (_nowBlendState != _prevBlendState)
+            switch (_blendState)
             {
-                switch (_prevBlendState)
-                {
-                    case BlendState.Alpha:
-                        Rlgl.SetBlendFactorsSeparate(Rlgl.SRC_ALPHA, Rlgl.ONE_MINUS_SRC_ALPHA, Rlgl.ONE, Rlgl.ONE_MINUS_SRC_ALPHA, Rlgl.FUNC_ADD, Rlgl.MAX);
-                        break;
-                    case BlendState.Additive:
-                        Rlgl.SetBlendFactorsSeparate(Rlgl.SRC_ALPHA, Rlgl.ONE, Rlgl.SRC_ALPHA, Rlgl.ONE, Rlgl.FUNC_ADD, Rlgl.MAX);
-                        break;
-                    case BlendState.Subtract:
-                        Rlgl.SetBlendFactorsSeparate(Rlgl.SRC_ALPHA, Rlgl.ONE, Rlgl.SRC_ALPHA, Rlgl.ONE, Rlgl.FUNC_REVERSE_SUBTRACT, Rlgl.MAX);
-                        break;
-                }
-                Rlgl.SetBlendMode(BlendMode.CustomSeparate);
-                // ブレンド状態が変わった場合は、前の状態を保存
-                _prevBlendState = _nowBlendState;
+                case BlendState.Alpha:
+                    Rlgl.SetBlendFactorsSeparate(Rlgl.SRC_ALPHA, Rlgl.ONE_MINUS_SRC_ALPHA, Rlgl.ONE, Rlgl.ONE_MINUS_SRC_ALPHA, Rlgl.FUNC_ADD, Rlgl.MAX);
+                    break;
+                case BlendState.Additive:
+                    Rlgl.SetBlendFactorsSeparate(Rlgl.SRC_ALPHA, Rlgl.ONE, Rlgl.SRC_ALPHA, Rlgl.ONE, Rlgl.FUNC_ADD, Rlgl.MAX);
+                    break;
+                case BlendState.Subtract:
+                    Rlgl.SetBlendFactorsSeparate(Rlgl.SRC_ALPHA, Rlgl.ONE, Rlgl.SRC_ALPHA, Rlgl.ONE, Rlgl.FUNC_REVERSE_SUBTRACT, Rlgl.MAX);
+                    break;
+                case BlendState.PMA_Alpha:
+                    Rlgl.SetBlendFactorsSeparate(Rlgl.ONE, Rlgl.ONE_MINUS_SRC_ALPHA, Rlgl.ONE, Rlgl.ONE_MINUS_SRC_ALPHA, Rlgl.FUNC_ADD, Rlgl.MAX);
+                    break;
             }
+            Rlgl.SetBlendMode(BlendMode.CustomSeparate);
 
             bool isSimpleDraw = _scaleX == 1.0 && _scaleY == 1.0 && _rotation == 0.0;
 
@@ -181,6 +194,8 @@ namespace Sharp
                 var destRect = new Raylib_cs.Rectangle((float)x, (float)y, sourceRect.Width * (float)_scaleX, sourceRect.Height * (float)_scaleY);
                 Raylib.DrawTexturePro(RayTexture, sourceRect, destRect, origin, (float)_rotation, color);
             }
+
+            Sharp.ResetAlphaBlend();
         }
 
         /// <summary>
@@ -225,5 +240,6 @@ namespace Sharp
         Alpha,
         Additive,
         Subtract,
+        PMA_Alpha,
     }
 }

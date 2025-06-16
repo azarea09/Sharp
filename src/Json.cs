@@ -2,9 +2,9 @@
 using System.Text;
 using ErrorEventArgs = Newtonsoft.Json.Serialization.ErrorEventArgs;
 
-namespace Sharp;
+namespace SharpEngine;
 
-internal class Json
+public class Json
 {
     /// <summary>
     /// ファイルからJSONを読み込み、オブジェクトを返します。

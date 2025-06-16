@@ -1,20 +1,19 @@
 ﻿using Raylib_cs;
+using SharpEngine;
 using System.Numerics;
-using Sharp;
 
 namespace Sharp_Test;
 
 class Program
 {
-    // STAThread is required if you deploy using NativeAOT on Windows - See https://github.com/raylib-cs/raylib-cs/issues/301
-    [STAThread]
     public static void Main()
     {
         Audio audio = null;
         Texture texture = null;
         Nuunlm nuunlm = null;
+        TaikoAtlasFont font = null;
 
-        Sharp.Sharp.Init(
+        Sharp.Init(
             beforeInit: () =>
             {
                 Raylib.SetConfigFlags(ConfigFlags.ResizableWindow);
@@ -22,7 +21,8 @@ class Program
             afterInit: () =>
             {
                 audio = new Audio("メドレー「淫夢MAD」.ogg", true);
-                texture = new Texture("elephant_1f418.png");
+                texture = new Texture("nuun.png");
+                font = new TaikoAtlasFont("jp_64.dds", "jp_64.xml");
                 nuunlm = new Nuunlm();
                 nuunlm.Load("donbg_a_06_1p\\donbg_a_06_1p.nuunlm");
                 nuunlm.Start(true);
@@ -34,7 +34,7 @@ class Program
 
         while (!Raylib.WindowShouldClose())
         {
-            Sharp.Sharp.Loop(() =>
+            Sharp.Loop(() =>
             {
                 Raylib.ClearBackground(Color.RayWhite);
 
@@ -47,9 +47,17 @@ class Program
 
                 nuunlm.Draw(0, 0);
 
+                double scale = 1.0;
+                var (textWidth, textHeight) = font.GetTextDimensions("それをしません←やめてね←うおｗ←どわーｗ←ガチイク！！", 0.8425, 0.8425, true, 7.8);
+                if (textWidth >= 1000)
+                {
+                    scale = (1000 / textWidth) * 0.8425;
+                }
 
-                Raylib.DrawText("FPS : " + Raylib.GetFPS(), 12, 12, 20, Color.Black);
+                font.Draw(1878, 29, "それをしません←やめてね←うおｗ←どわーｗ←ガチイク！！", 7.8, new Vector2(0.8425f * (float)scale), 255, ReferencePoint.TopRight);
 
+
+                Raylib.DrawText("FPS : " + Raylib.GetFPS(), 12, 12, 28, Color.Black);
             });
         }
     }

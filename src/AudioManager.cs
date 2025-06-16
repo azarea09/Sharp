@@ -4,7 +4,7 @@ using Un4seen.Bass.AddOn.Fx;
 using Un4seen.Bass.AddOn.Mix;
 using Un4seen.BassWasapi;
 
-namespace Sharp
+namespace SharpEngine
 {
     public static class AudioManager
     {

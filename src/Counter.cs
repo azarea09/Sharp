@@ -1,6 +1,6 @@
 ﻿using Raylib_cs;
 
-namespace Sharp
+namespace SharpEngine
 {
     /// <summary>
     /// カウンタークラス。
