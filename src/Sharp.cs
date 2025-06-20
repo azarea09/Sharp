@@ -88,15 +88,6 @@ namespace SharpEngine
             }
         }
 
-        /// <summary>
-        /// アルファブレンドにリセットします。
-        /// </summary>
-        public static void ResetAlphaBlend()
-        {
-            Rlgl.SetBlendFactorsSeparate(Rlgl.SRC_ALPHA, Rlgl.ONE_MINUS_SRC_ALPHA, Rlgl.ONE, Rlgl.ONE_MINUS_SRC_ALPHA, Rlgl.FUNC_ADD, Rlgl.MAX);
-            Rlgl.SetBlendMode(BlendMode.CustomSeparate);
-        }
-
         #region [private]
         /// <summary>
         /// 仮想画面を実画面に描画します。
@@ -113,8 +104,7 @@ namespace SharpEngine
                 SceneHeight * scale
             );
 
-            Rlgl.SetBlendFactorsSeparate(Rlgl.SRC_ALPHA, Rlgl.ONE_MINUS_SRC_ALPHA, Rlgl.ONE, Rlgl.ONE_MINUS_SRC_ALPHA, Rlgl.FUNC_ADD, Rlgl.MAX);
-            Rlgl.SetBlendMode(BlendMode.CustomSeparate);
+            Rlgl.SetBlendMode(BlendMode.Alpha);
             Raylib.DrawTexturePro(target.Texture, source, dest, Vector2.Zero, 0, Color.White);
         }
 

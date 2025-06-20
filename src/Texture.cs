@@ -11,6 +11,12 @@ namespace SharpEngine
         public bool IsEnable { get; private set; }
         public string FileName { get; private set; }
         public Texture2D RayTexture { get; private set; }
+        public double GetScaleX() => _scaleX;
+        public double GetScaleY() => _scaleY;
+        public double GetRotation() => _rotation;
+        public bool IsReversedX() => _reversedX;
+        public bool IsReversedY() => _reversedY;
+        public Color GetColor() => _color;
 
         private double _rotation;
         private double _scaleX;
@@ -21,14 +27,6 @@ namespace SharpEngine
         private ReferencePoint _referencePoint;
         private Rectangle? _sourceRect = null;
         private BlendState _blendState;
-
-
-        public double GetScaleX() => _scaleX;
-        public double GetScaleY() => _scaleY;
-        public double GetRotation() => _rotation;
-        public bool IsReversedX() => _reversedX;
-        public bool IsReversedY() => _reversedY;
-        public Color GetColor() => _color;
 
         public Texture()
         {
@@ -104,7 +102,27 @@ namespace SharpEngine
 
         public Texture Colored(Color color, double opacity)
         {
-            this._color = Color.FromArgb((int)opacity, color.R, color.G, color.B);
+            int alpha = Math.Clamp((int)opacity, 0, 255);
+            this._color = Color.FromArgb(alpha, color.R, color.G, color.B);
+            return this;
+        }
+
+        public Texture Colored(Color color)
+        {
+            this._color = Color.FromArgb(this._color.A, color.R, color.G, color.B);
+            return this;
+        }
+
+        public Texture Colored(Raylib_cs.Color color, double opacity)
+        {
+            int alpha = Math.Clamp((int)opacity, 0, 255);
+            this._color = Color.FromArgb(alpha, color.R, color.G, color.B);
+            return this;
+        }
+
+        public Texture Colored(Raylib_cs.Color color)
+        {
+            this._color = Color.FromArgb(this._color.A, color.R, color.G, color.B);
             return this;
         }
 
@@ -116,7 +134,8 @@ namespace SharpEngine
 
         public Texture Colored(double opacity)
         {
-            this._color = Color.FromArgb((int)opacity, 255, 255, 255);
+            int alpha = Math.Clamp((int)opacity, 0, 255);
+            this._color = Color.FromArgb(alpha, this._color.R, this._color.G, this._color.B);
             return this;
         }
 
@@ -169,19 +188,18 @@ namespace SharpEngine
             switch (_blendState)
             {
                 case BlendState.Alpha:
-                    Rlgl.SetBlendFactorsSeparate(Rlgl.SRC_ALPHA, Rlgl.ONE_MINUS_SRC_ALPHA, Rlgl.ONE, Rlgl.ONE_MINUS_SRC_ALPHA, Rlgl.FUNC_ADD, Rlgl.MAX);
+                    Rlgl.SetBlendMode(BlendMode.Alpha);
                     break;
                 case BlendState.Additive:
-                    Rlgl.SetBlendFactorsSeparate(Rlgl.SRC_ALPHA, Rlgl.ONE, Rlgl.SRC_ALPHA, Rlgl.ONE, Rlgl.FUNC_ADD, Rlgl.MAX);
+                    Rlgl.SetBlendMode(BlendMode.Additive);
                     break;
                 case BlendState.Subtract:
-                    Rlgl.SetBlendFactorsSeparate(Rlgl.SRC_ALPHA, Rlgl.ONE, Rlgl.SRC_ALPHA, Rlgl.ONE, Rlgl.FUNC_REVERSE_SUBTRACT, Rlgl.MAX);
+                    Rlgl.SetBlendMode(BlendMode.SubtractColors);
                     break;
                 case BlendState.PMA_Alpha:
-                    Rlgl.SetBlendFactorsSeparate(Rlgl.ONE, Rlgl.ONE_MINUS_SRC_ALPHA, Rlgl.ONE, Rlgl.ONE_MINUS_SRC_ALPHA, Rlgl.FUNC_ADD, Rlgl.MAX);
+                    Rlgl.SetBlendMode(BlendMode.AlphaPremultiply);
                     break;
             }
-            Rlgl.SetBlendMode(BlendMode.CustomSeparate);
 
             bool isSimpleDraw = _scaleX == 1.0 && _scaleY == 1.0 && _rotation == 0.0;
 
@@ -195,7 +213,7 @@ namespace SharpEngine
                 Raylib.DrawTexturePro(RayTexture, sourceRect, destRect, origin, (float)_rotation, color);
             }
 
-            Sharp.ResetAlphaBlend();
+            Rlgl.SetBlendMode(BlendMode.Alpha);
         }
 
         /// <summary>

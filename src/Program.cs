@@ -1,5 +1,6 @@
 ﻿using Raylib_cs;
 using SharpEngine;
+using SharpEngine.Gui;
 using System.Numerics;
 
 namespace Sharp_Test;
@@ -32,11 +33,13 @@ class Program
             WindowTitle: "Sharp Test"
         );
 
+        Button button = new Button("Play", 960, 540, 140, 24, () => { audio?.PlayOneShot(); });
+
         while (!Raylib.WindowShouldClose())
         {
             Sharp.Loop(() =>
             {
-                Raylib.ClearBackground(Color.RayWhite);
+                Raylib.ClearBackground(RaylibTranslator.FromHtml("#2a2b34"));
 
                 if (Raylib.IsKeyPressed(KeyboardKey.Enter))
                 {
@@ -56,6 +59,7 @@ class Program
 
                 font.Draw(1878, 29, "それをしません←やめてね←うおｗ←どわーｗ←ガチイク！！", 7.8, new Vector2(0.8425f * (float)scale), 255, ReferencePoint.TopRight);
 
+                button.Draw();
 
                 Raylib.DrawText("FPS : " + Raylib.GetFPS(), 12, 12, 28, Color.Black);
             });
