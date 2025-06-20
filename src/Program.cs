@@ -10,9 +10,8 @@ class Program
     public static void Main()
     {
         Audio audio = null;
-        Texture texture = null;
-        Nuunlm nuunlm = null;
-        TaikoAtlasFont font = null;
+        Audio don = null;
+        Audio ka = null;
 
         Sharp.Init(
             beforeInit: () =>
@@ -22,18 +21,15 @@ class Program
             afterInit: () =>
             {
                 audio = new Audio("メドレー「淫夢MAD」.ogg", true);
-                texture = new Texture("nuun.png");
-                font = new TaikoAtlasFont("jp_64.dds", "jp_64.xml");
-                nuunlm = new Nuunlm();
-                nuunlm.Load("donbg_a_06_1p\\donbg_a_06_1p.nuunlm");
-                nuunlm.Start(true);
+                audio.Pitch = 1.0;
+                audio.Volume = 0.7;
+                don = new Audio("se_neiro_00_v12a_don_c.ogg", false);
+                ka = new Audio("se_neiro_00_v12a_katsu_c.ogg", false);
             },
             WindowSize: new Vector2(1280, 720),
             SceneSize: new Vector2(1920, 1080),
             WindowTitle: "Sharp Test"
         );
-
-        Button button = new Button("Play", 960, 540, 140, 24, () => { audio?.PlayOneShot(); });
 
         while (!Raylib.WindowShouldClose())
         {
@@ -46,22 +42,37 @@ class Program
                     audio?.PlayOneShot();
                 }
 
-                nuunlm.Update();
-
-                nuunlm.Draw(0, 0);
-
-                double scale = 1.0;
-                var (textWidth, textHeight) = font.GetTextDimensions("それをしません←やめてね←うおｗ←どわーｗ←ガチイク！！", 0.8425, 0.8425, true, 7.8);
-                if (textWidth >= 1000)
+                if (Raylib.IsKeyPressed(KeyboardKey.F) || Raylib.IsKeyPressed(KeyboardKey.J))
                 {
-                    scale = (1000 / textWidth) * 0.8425;
+                    don?.PlayOneShot();
                 }
 
-                font.Draw(1878, 29, "それをしません←やめてね←うおｗ←どわーｗ←ガチイク！！", 7.8, new Vector2(0.8425f * (float)scale), 255, ReferencePoint.TopRight);
+                if (Raylib.IsKeyPressed(KeyboardKey.D) || Raylib.IsKeyPressed(KeyboardKey.K))
+                {
+                    ka?.PlayOneShot();
+                }
 
-                button.Draw();
+                if (Raylib.IsKeyPressed(KeyboardKey.Left))
+                {
+                    audio.Pan -= 0.1;
+                }
 
-                Raylib.DrawText("FPS : " + Raylib.GetFPS(), 12, 12, 28, Color.Black);
+                if (Raylib.IsKeyPressed(KeyboardKey.Right))
+                {
+                    audio.Pan += 0.1;
+                }
+
+                if (Raylib.IsKeyPressed(KeyboardKey.Up))
+                {
+                    audio.PlaySpeed += 0.05;
+                }
+
+                if (Raylib.IsKeyPressed(KeyboardKey.Down))
+                {
+                    audio.PlaySpeed -= 0.05;
+                }
+
+                Raylib.DrawText("FPS : " + audio.Time, 12, 12, 28, Color.Black);
             });
         }
     }

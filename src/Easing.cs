@@ -1,220 +1,85 @@
 ﻿namespace SharpEngine
 {
-    public class Easing
+    /// <summary>
+    /// イージング処理を行う静的クラス。各種イージング関数や、指定時間内での値の補間を提供する。
+    /// </summary>
+    public static class Easing
     {
+        /// <summary>イージングの種類を表す列挙体</summary>
         public enum CalcType
         {
-            Quadratic,
-            Cubic,
-            Quartic,
-            Quintic,
-            Sinusoidal,
-            Exponential,
-            Circular,
-            None
+            None,   // 線形
+            Quad,   // 2次（Quadratic）
+            Cubic,  // 3次
+            Quart,  // 4次
+            Quint,  // 5次
+            Sine,   // Sinカーブ
+            Expo,   // 指数
+            Circ    // 円形
         }
 
-        private static double StartPoint;
-
-        private static double EndPoint;
-
-        private static double Diff;
-
-        private static int TimeMs;
-
-        private static CalcType Type;
-
-        private static double CounterValue;
-
-        private static double Value;
-
-        public static double easeInQuart(double x)
+        /// <summary>
+        /// 値を0.0～1.0の範囲で受け取り、指定のイージングタイプで補間を計算して返します。
+        /// </summary>
+        public static double EaseT(double t, CalcType type, bool easeIn = true)
         {
-            return x * x * x * x;
-        }
+            t = Math.Clamp(t, 0.0, 1.0);
 
-        public static double easeOutBounce(double x)
-        {
-            double n1 = 7.5625;
-            double d1 = 2.75;
-            if (x < 1.0 / d1)
+            return (type, easeIn) switch
             {
-                return n1 * x * x;
-            }
-            if (x < 2.0 / d1)
-            {
-                return n1 * (x -= 1.5 / d1) * x + 0.75;
-            }
-            if (x < 2.5 / d1)
-            {
-                return n1 * (x -= 2.25 / d1) * x + 0.9375;
-            }
-            return n1 * (x -= 2.625 / d1) * x + 63.0 / 64.0;
+                (CalcType.Quad, true) => t * t,
+                (CalcType.Quad, false) => 1 - (1 - t) * (1 - t),
+
+                (CalcType.Cubic, true) => t * t * t,
+                (CalcType.Cubic, false) => 1 - Math.Pow(1 - t, 3),
+
+                (CalcType.Quart, true) => t * t * t * t,
+                (CalcType.Quart, false) => 1 - Math.Pow(1 - t, 4),
+
+                (CalcType.Quint, true) => t * t * t * t * t,
+                (CalcType.Quint, false) => 1 - Math.Pow(1 - t, 5),
+
+                (CalcType.Sine, true) => 1 - Math.Cos(t * Math.PI / 2),
+                (CalcType.Sine, false) => Math.Sin(t * Math.PI / 2),
+
+                (CalcType.Expo, true) => (t == 0) ? 0 : Math.Pow(2, 10 * (t - 1)),
+                (CalcType.Expo, false) => (t == 1) ? 1 : 1 - Math.Pow(2, -10 * t),
+
+                (CalcType.Circ, true) => 1 - Math.Sqrt(1 - t * t),
+                (CalcType.Circ, false) => Math.Sqrt(1 - Math.Pow(t - 1, 2)),
+
+                _ => t // None or fallback: Linear
+            };
         }
 
-        public static double easeOutCubic(double x)
+        /// <summary>
+        /// 開始値から終了値へ、指定イージングのEaseInで補間した値を返します。
+        /// </summary>
+        /// <param name="counterValue">現在の経過フレーム</param>
+        /// <param name="startPoint">開始値</param>
+        /// <param name="endPoint">終了値</param>
+        /// <param name="type">使用するイージングタイプ</param>
+        /// <returns>補間後の値</returns>
+        public static double EaseIn(double counterValue, double startPoint, double endPoint, CalcType type)
         {
-            return 1.0 - Math.Pow(1.0 - x, 3.0);
+            if (endPoint - startPoint <= 0) return endPoint;
+            double t = Math.Clamp((counterValue - startPoint) / (endPoint - startPoint), 0.0, 1.0);
+            return startPoint + (endPoint - startPoint) * EaseT(t, type, easeIn: true);
         }
 
-        public static double easeOutQuart(double x)
+        /// <summary>
+        /// 開始値から終了値へ、指定イージングのEaseOutで補間した値を返します。
+        /// </summary>
+        /// <param name="counterValue">現在の経過フレーム</param>
+        /// <param name="startPoint">開始値</param>
+        /// <param name="endPoint">終了値</param>
+        /// <param name="type">使用するイージングタイプ</param>
+        /// <returns>補間後の値</returns>
+        public static double EaseOut(double counterValue, double startPoint, double endPoint, CalcType type)
         {
-            return 1.0 - Math.Pow(1.0 - x, 4.0);
-        }
-
-        public static double easeOutQuad(double x)
-        {
-            return 1.0 - (1.0 - x) * (1.0 - x);
-        }
-
-        public static double easeInQuad(double x)
-        {
-            return x * x;
-        }
-
-        public static double easeOutExpo(double x)
-        {
-            return (x == 1.0) ? 1.0 : (1.0 - Math.Pow(2.0, -10.0 * x));
-        }
-
-        public static double easeInSine(double x)
-        {
-            return 1.0 - Math.Cos(x * Math.PI / 2.0);
-        }
-
-        public static double easeOutSine(double x)
-        {
-            return Math.Sin(x * Math.PI / 2.0);
-        }
-
-        public static double easeInOutSine(double x)
-        {
-            return (0.0 - (Math.Cos(Math.PI * x) - 1.0)) / 2.0;
-        }
-
-        public static double easeOutCirc(double x)
-        {
-            return Math.Sqrt(1.0 - Math.Pow(x - 1.0, 2.0));
-        }
-
-        public static double easeInOutCirc(double x)
-        {
-            return (x < 0.5) ? ((1.0 - Math.Sqrt(1.0 - Math.Pow(2.0 * x, 2.0))) / 2.0) : ((Math.Sqrt(1.0 - Math.Pow(-2.0 * x + 2.0, 2.0)) + 1.0) / 2.0);
-        }
-
-        public static double Linear(double start, double end, double value)
-        {
-            return start + (end - start) * value;
-        }
-
-        public static double EaseInCubic(double start, double end, double value)
-        {
-            end -= start;
-            return end * value * value * value + start;
-        }
-
-        public static double easeInCubic(double value)
-        {
-            return value * value * value;
-        }
-
-        public static double EaseInSine(double start, double end, double value)
-        {
-            end -= start;
-            return (0.0 - end) * Math.Cos(value * (Math.PI / 2.0)) + end + start;
-        }
-
-        public static double EaseOutSine(double start, double end, double value)
-        {
-            end -= start;
-            return end * Math.Sin(value * (Math.PI / 2.0)) + start;
-        }
-
-        public static int EaseIn(double countervalue, double counterend, double startPoint, double endPoint, CalcType type)
-        {
-            StartPoint = startPoint;
-            EndPoint = endPoint;
-            Diff = EndPoint - StartPoint;
-            TimeMs = (int)counterend;
-            Type = type;
-            CounterValue = countervalue;
-            switch (Type)
-            {
-                case CalcType.Quadratic:
-                    CounterValue /= TimeMs;
-                    Value = Diff * CounterValue * CounterValue + StartPoint;
-                    break;
-                case CalcType.Cubic:
-                    CounterValue /= TimeMs;
-                    Value = Diff * CounterValue * CounterValue * CounterValue + StartPoint;
-                    break;
-                case CalcType.Quartic:
-                    CounterValue /= TimeMs;
-                    Value = Diff * CounterValue * CounterValue * CounterValue * CounterValue + StartPoint;
-                    break;
-                case CalcType.Quintic:
-                    CounterValue /= TimeMs;
-                    Value = Diff * CounterValue * CounterValue * CounterValue * CounterValue * CounterValue + StartPoint;
-                    break;
-                case CalcType.Sinusoidal:
-                    Value = (0.0 - Diff) * Math.Cos(CounterValue / (double)TimeMs * (Math.PI / 2.0)) + Diff + StartPoint;
-                    break;
-                case CalcType.Exponential:
-                    Value = Diff * Math.Pow(2.0, 10.0 * (CounterValue / (double)TimeMs - 1.0)) + StartPoint;
-                    break;
-                case CalcType.Circular:
-                    CounterValue /= TimeMs;
-                    Value = (0.0 - Diff) * (Math.Sqrt(1.0 - CounterValue * CounterValue) - 1.0) + StartPoint;
-                    break;
-            }
-            return (int)Value;
-        }
-
-        public static int EaseOut(double countervalue, double counterend, double startPoint, double endPoint, CalcType type)
-        {
-            StartPoint = startPoint;
-            EndPoint = endPoint;
-            Diff = EndPoint - StartPoint;
-            TimeMs = (int)counterend;
-            Type = type;
-            CounterValue = countervalue;
-            switch (Type)
-            {
-                case CalcType.Quadratic:
-                    CounterValue /= TimeMs;
-                    Value = (0.0 - Diff) * CounterValue * (CounterValue - 2.0) + StartPoint;
-                    break;
-                case CalcType.Cubic:
-                    CounterValue /= TimeMs;
-                    CounterValue -= 1.0;
-                    Value = Diff * (CounterValue * CounterValue * CounterValue + 1.0) + StartPoint;
-                    break;
-                case CalcType.Quartic:
-                    CounterValue /= TimeMs;
-                    CounterValue -= 1.0;
-                    Value = (0.0 - Diff) * (CounterValue * CounterValue * CounterValue * CounterValue - 1.0) + StartPoint;
-                    break;
-                case CalcType.Quintic:
-                    CounterValue /= TimeMs;
-                    CounterValue -= 1.0;
-                    Value = Diff * (CounterValue * CounterValue * CounterValue * CounterValue * CounterValue + 1.0) + StartPoint;
-                    break;
-                case CalcType.Sinusoidal:
-                    Value = Diff * Math.Sin(CounterValue / (double)TimeMs * (Math.PI / 2.0)) + StartPoint;
-                    break;
-                case CalcType.Exponential:
-                    Value = Diff * (0.0 - Math.Pow(2.0, -10.0 * CounterValue / (double)TimeMs) + 1.0) + StartPoint;
-                    break;
-                case CalcType.Circular:
-                    CounterValue /= TimeMs;
-                    CounterValue -= 1.0;
-                    Value = Diff * Math.Sqrt(1.0 - CounterValue * CounterValue) + StartPoint;
-                    break;
-                case CalcType.None:
-                    Value = startPoint + countervalue / counterend * (endPoint - startPoint);
-                    break;
-            }
-            return (int)Value;
+            if (endPoint - startPoint <= 0) return endPoint;
+            double t = Math.Clamp((counterValue - startPoint) / (endPoint - startPoint), 0.0, 1.0);
+            return startPoint + (endPoint - startPoint) * EaseT(t, type, easeIn: false);
         }
     }
 }

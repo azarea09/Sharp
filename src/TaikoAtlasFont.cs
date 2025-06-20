@@ -115,7 +115,7 @@ namespace SharpEngine
                     y1 *= scale.Value.Y;
 
                     double countervalue = ((opacity >= 255.0) ? 255.0 : ((opacity < 0.0) ? 0.0 : opacity));
-                    double edge_opacity = Easing.EaseIn(countervalue, 255.0, 0.0, 255.0, Easing.CalcType.Quartic);
+                    double edge_opacity = Easing.EaseIn(countervalue, 0.0, 255.0, Easing.CalcType.Quart);
                     texture.Colored(backColor.Value, edge_opacity);
                     texture.Scaled(scale.Value.X, scale.Value.Y);
                     texture.Draw(x + x1, y + y1);

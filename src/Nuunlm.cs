@@ -79,6 +79,12 @@ public class Nuunlm
         }
     }
 
+    public int GetNowFrame()
+    {
+        if (Counter == null) return 0;
+        return (int)Counter.Value;
+    }
+
     public bool IsPlaying()
     {
         if (Counter == null) return false;

@@ -14,6 +14,10 @@ namespace SharpEngine
         public double GetScaleX() => _scaleX;
         public double GetScaleY() => _scaleY;
         public double GetRotation() => _rotation;
+        public double GetOpacity() => _color.A;
+        public ReferencePoint GetReferencePoint() => _referencePoint;
+        public Rectangle? GetSourceRect() => _sourceRect;
+        public BlendState GetBlendState() => _blendState;
         public bool IsReversedX() => _reversedX;
         public bool IsReversedY() => _reversedY;
         public Color GetColor() => _color;
@@ -81,6 +85,17 @@ namespace SharpEngine
             return this;
         }
 
+        public Texture ScaledX(double x)
+        {
+            this._scaleX = x;
+            return this;
+        }
+        public Texture ScaledY(double y)
+        {
+            this._scaleY = y;
+            return this;
+        }
+
         public Texture Rotated(double angle)
         {
             this._rotation = angle;
@@ -97,6 +112,18 @@ namespace SharpEngine
         public Texture Croped(double x, double y, double width, double height)
         {
             this._sourceRect = new Rectangle((int)x, (int)y, (int)width, (int)height);
+            return this;
+        }
+
+        public Texture Croped(Raylib_cs.Rectangle rectangle)
+        {
+            this._sourceRect = new Rectangle((int)rectangle.X, (int)rectangle.Y, (int)rectangle.Width, (int)rectangle.Height);
+            return this;
+        }
+
+        public Texture Croped(Rectangle rectangle)
+        {
+            this._sourceRect = rectangle;
             return this;
         }
 
@@ -128,7 +155,8 @@ namespace SharpEngine
 
         public Texture Colored(int r, int g, int b, int a)
         {
-            this._color = Color.FromArgb(a, r, g, b);
+            int alpha = Math.Clamp((int)a, 0, 255);
+            this._color = Color.FromArgb(alpha, r, g, b);
             return this;
         }
 
@@ -196,6 +224,13 @@ namespace SharpEngine
                 case BlendState.Subtract:
                     Rlgl.SetBlendMode(BlendMode.SubtractColors);
                     break;
+                case BlendState.Multiply:
+                    Rlgl.SetBlendMode(BlendMode.Multiplied);
+                    break;
+                case BlendState.Screen:
+                    Rlgl.SetBlendFactorsSeparate(Rlgl.SRC_ALPHA, Rlgl.ONE, Rlgl.SRC_ALPHA, Rlgl.ONE_MINUS_SRC_ALPHA, Rlgl.FUNC_ADD, Rlgl.MAX);
+                    Rlgl.SetBlendMode(BlendMode.CustomSeparate);
+                    break;
                 case BlendState.PMA_Alpha:
                     Rlgl.SetBlendMode(BlendMode.AlphaPremultiply);
                     break;
@@ -258,6 +293,8 @@ namespace SharpEngine
         Alpha,
         Additive,
         Subtract,
+        Screen,
+        Multiply,
         PMA_Alpha,
     }
 }
