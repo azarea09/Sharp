@@ -1,19 +1,33 @@
 ﻿using Raylib_cs;
+using System.Numerics;
 
 namespace SharpEngine
 {
-    public class TTFFont
+    public class TTFFont : IDisposable
     {
-        public Font Font { get; private set; } = new Font();
+        public Font Font { get; private set; }
 
         public TTFFont(string fontPath, bool includeKanji, int fontSize = 48, int[] customCodePoints = null)
         {
             LoadFont(fontPath, includeKanji, fontSize, customCodePoints);
         }
 
+        public void Dispose()
+        {
+            if (Font.BaseSize != 0)
+            {
+                Raylib.UnloadFont(Font);
+            }
+        }
+
         public void DrawText(string text, float x, float y, float fontSize, float spacing, Color color)
         {
             Raylib.DrawTextEx(Font, text, new System.Numerics.Vector2(x, y), fontSize, spacing, color);
+        }
+
+        public Vector2 MeasureText(string text, float fontSize, float spacing)
+        {
+            return Raylib.MeasureTextEx(Font, text, fontSize, spacing);
         }
 
         private void LoadFont(string fontPath, bool includeKanji, int fontSize, int[] customCodePoints = null)
