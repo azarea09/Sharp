@@ -27,6 +27,7 @@
             #region [exo読み込み→nuulmオブジェクト生成]
             ExoParser exo = new ExoParser(exoPath);
             AnimationData animation = new AnimationData();
+            animation.nuunlm = new List<FrameData>();
 
             animation.TextureFileNames = exo.textureFileNames;
             animation.FrameLength = exo.FrameLength - 1;
@@ -98,6 +99,8 @@
             {
                 framesByNumber[i] = tempFrames[i].ToArray();
             }
+
+            animationData = animation; // アニメーションデータを設定
         }
 
         /// <summary>
@@ -106,7 +109,7 @@
         /// <param name="isLoop">ループするか否か</param>
         public void Start(bool isLoop)
         {
-            Counter = new Counter(0, animationData.FrameLength, 16.6667, isLoop);
+            Counter = new Counter(0, animationData.FrameLength, 16.6666, isLoop);
             Counter.Start();
         }
 
