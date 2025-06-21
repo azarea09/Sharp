@@ -11,9 +11,9 @@ namespace SharpEngine
             LoadFont(fontPath, includeKanji, fontSize, customCodePoints);
         }
 
-        public void DrawText(string text, double x, double y, float fontSize, Color color)
+        public void DrawText(string text, float x, float y, float fontSize, float spacing, Color color)
         {
-            Raylib.DrawTextEx(Font, text, new System.Numerics.Vector2((float)x, (float)y), fontSize, 1.0f, color);
+            Raylib.DrawTextEx(Font, text, new System.Numerics.Vector2(x, y), fontSize, spacing, color);
         }
 
         private void LoadFont(string fontPath, bool includeKanji, int fontSize, int[] customCodePoints = null)
