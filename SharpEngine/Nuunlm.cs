@@ -3,12 +3,24 @@
 /// <summary>
 /// AviutlのExoを軽量化したNuunlm形式のアニメーションを扱うクラス。
 /// </summary>
-public class Nuunlm
+public class Nuunlm : IDisposable
 {
     private List<Texture> Textures = new List<Texture>();
     private AnimationData animationData { get; set; } = new AnimationData();
     private DrawData[][] framesByNumber;
     private Counter Counter;
+
+    public void Dispose()
+    {
+        if (Textures != null)
+        {
+            foreach (var texture in Textures)
+            {
+                texture.Dispose();
+            }
+            Textures.Clear();
+        }
+    }
 
     public void Load(string path)
     {
