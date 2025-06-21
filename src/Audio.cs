@@ -24,7 +24,7 @@ namespace SharpEngine
         private double? _loopStartSec, _loopEndSec;
         private readonly List<(int Handle, long Bytes)> _activeHandles = new();
 
-        public string FileName { get; private set; }
+        public string FilePath { get; private set; }
         public bool IsEnable { get; private set; }
         public bool Loop { get; set; }
 
@@ -61,7 +61,7 @@ namespace SharpEngine
         }
 
         /// <summary>
-        /// 音量（0～1）
+        /// 音量（0.0～）
         /// </summary>
         public double Volume
         {
@@ -101,10 +101,17 @@ namespace SharpEngine
         /// 音声の総再生時間（秒）
         /// </summary>
         public double TotalTime => Bass.BASS_ChannelBytes2Seconds(_handle, Bass.BASS_ChannelGetLength(_handle));
-        
-        public Audio(string fileName, bool loop = false, double? loopStartSec = null, double? loopEndSec = null)
+
+        /// <summary>
+        /// 音声を再生するためのクラス
+        /// </summary>
+        /// <param name="filePath">音声のあるファイルパス</param>
+        /// <param name="loop">ループするかどうか</param>
+        /// <param name="loopStartSec">ループする開始地点 (デフォルト0.0)</param>
+        /// <param name="loopEndSec">ループする終了地点 (デフォルト音源の最後)</param>
+        public Audio(string filePath, bool loop = false, double? loopStartSec = null, double? loopEndSec = null)
         {
-            FileName = fileName.Replace("\\", "/");
+            FilePath = filePath.Replace("\\", "/");
             Loop = loop;
             _loopStartSec = loopStartSec;
             _loopEndSec = loopEndSec;
@@ -147,7 +154,7 @@ namespace SharpEngine
         public void Stop() => BassMix.BASS_Mixer_ChannelPause(_handle);
 
         /// <summary>
-        /// ループ再生の自動判定
+        /// ループ再生の自動判定 (Sharpを利用する側は使いません)
         /// </summary>
         public void CheckAndLoop()
         {
@@ -168,7 +175,7 @@ namespace SharpEngine
 
         private void Load(float[] gains = null)
         {
-            string path = File.Exists(FileName) ? FileName : FileName.Replace(".ogg", ".wav");
+            string path = File.Exists(FilePath) ? FilePath : FilePath.Replace(".ogg", ".wav");
             _handle = Bass.BASS_StreamCreateFile(path, 0L, 0L, BASSFlag.BASS_SAMPLE_FLOAT | BASSFlag.BASS_STREAM_DECODE);
             if (_handle == 0) return;
 

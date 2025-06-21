@@ -1,11 +1,13 @@
 ﻿using Raylib_cs;
 using System.Numerics;
 using System.Xml.Linq;
-using static System.Net.Mime.MediaTypeNames;
 using Color = System.Drawing.Color;
 
 namespace SharpEngine
 {
+    /// <summary>
+    /// 太鼓の達人のアトラスフォントを扱うクラス。
+    /// </summary>
     public class TaikoAtlasFont
     {
         private static Texture _fontTexture;

@@ -1,5 +1,8 @@
 ﻿namespace SharpEngine
 {
+    /// <summary>
+    /// System.Drawingの色や矩形をRaylib_csのColorやRectangleに変換するためのユーティリティクラス。
+    /// </summary>
     public static class RaylibTranslator
     {
         public static Raylib_cs.Color FromHtml(string htmlColor)

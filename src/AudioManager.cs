@@ -1,11 +1,13 @@
-﻿using Raylib_cs;
-using Un4seen.Bass;
+﻿using Un4seen.Bass;
 using Un4seen.Bass.AddOn.Fx;
 using Un4seen.Bass.AddOn.Mix;
 using Un4seen.BassWasapi;
 
 namespace SharpEngine
 {
+    /// <summary>
+    /// オーディオの管理を行うクラス。
+    /// </summary>
     public static class AudioManager
     {
         public static List<(int Handle, long Bytes)> ListProcOverlaps = new();

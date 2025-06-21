@@ -12,6 +12,7 @@ class Program
         Audio audio = null;
         Audio don = null;
         Audio ka = null;
+        Texture texture = null;
 
         Sharp.Init(
             beforeInit: () =>
@@ -72,7 +73,7 @@ class Program
                     audio.PlaySpeed -= 0.05;
                 }
 
-                Raylib.DrawText("FPS : " + audio.Time, 12, 12, 28, Color.Black);
+                Raylib.DrawText("FPS : " + Raylib.GetFPS(), 12, 12, 28, Color.Black);
             });
         }
     }

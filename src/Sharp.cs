@@ -5,6 +5,9 @@ using System.Runtime.InteropServices;
 
 namespace SharpEngine
 {
+    /// <summary>
+    /// Raylibを使いやすくラップした物を提供するクラス。
+    /// </summary>
     public static class Sharp
     {
         public static int WindowWidth; // ウィンドウのサイズ

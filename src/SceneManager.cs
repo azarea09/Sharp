@@ -8,6 +8,9 @@ using static System.Formats.Asn1.AsnWriter;
 
 namespace SharpEngine
 {
+    /// <summary>
+    /// シーンを管理するクラス。
+    /// </summary>
     public class SceneManager
     {
         public SceneManager()

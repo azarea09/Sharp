@@ -1,5 +1,8 @@
 ﻿namespace SharpEngine;
 
+/// <summary>
+/// AviutlのExoを軽量化したNuunlm形式のアニメーションを扱うクラス。
+/// </summary>
 public class Nuunlm
 {
     private List<Texture> Textures = new List<Texture>();
@@ -40,12 +43,19 @@ public class Nuunlm
         }
     }
 
+    /// <summary>
+    /// アニメーションの再生を開始します。
+    /// </summary>
+    /// <param name="isLoop">ループするか否か</param>
     public void Start(bool isLoop)
     {
         Counter = new Counter(0, animationData.FrameLength, 16.6667, isLoop);
         Counter.Start();
     }
 
+    /// <summary>
+    /// アニメーションの再生を停止します。
+    /// </summary>
     public void Stop()
     {
         if (Counter == null) return;
@@ -53,12 +63,18 @@ public class Nuunlm
         Counter.Reset();
     }
 
+    /// <summary>
+    /// アニメーションの更新を行います。
+    /// </summary>
     public void Update()
     {
         if (Counter == null) return;
         Counter.Tick();
     }
 
+    /// <summary>
+    /// アニメーションを描画します。
+    /// </summary>
     public void Draw(double offsetX = 0.0, double offsetY = 0.0, double opacity = 255, Texture texture = null)
     {
         if (Counter == null || !IsPlaying() || opacity <= 0.0) return;
@@ -79,12 +95,20 @@ public class Nuunlm
         }
     }
 
+    /// <summary>
+    /// 今のフレーム番号を取得します。
+    /// </summary>
+    /// <returns></returns>
     public int GetNowFrame()
     {
         if (Counter == null) return 0;
         return (int)Counter.Value;
     }
 
+    /// <summary>
+    /// 再生しているかどうか。
+    /// </summary>
+    /// <returns></returns>
     public bool IsPlaying()
     {
         if (Counter == null) return false;

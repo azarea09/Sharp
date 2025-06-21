@@ -1,11 +1,13 @@
 ﻿using Raylib_cs;
-using System.Drawing;
 using System.Numerics;
 using Color = System.Drawing.Color;
 using Rectangle = System.Drawing.Rectangle;
 
 namespace SharpEngine
 {
+    /// <summary>
+    /// 画像テクスチャを扱うクラス。
+    /// </summary>
     public class Texture : IDisposable
     {
         public bool IsEnable { get; private set; }
@@ -71,7 +73,9 @@ namespace SharpEngine
             }
         }
 
-
+        /// <summary>
+        /// テクスチャにスケールを適用する。
+        /// </summary>
         public Texture Scaled(double value)
         {
             this._scaleX = value;
@@ -85,23 +89,35 @@ namespace SharpEngine
             return this;
         }
 
+        /// <summary>
+        /// テクスチャにX方向のスケールを適用する。
+        /// </summary>
         public Texture ScaledX(double x)
         {
             this._scaleX = x;
             return this;
         }
+        /// <summary>
+        /// テクスチャにY方向のスケールを適用する。
+        /// </summary>
         public Texture ScaledY(double y)
         {
             this._scaleY = y;
             return this;
         }
 
+        /// <summary>
+        /// テクスチャを指定した角度で回転させる。(単位は度)
+        /// </summary>
         public Texture Rotated(double angle)
         {
             this._rotation = angle;
             return this;
         }
 
+        /// <summary>
+        /// テクスチャをX軸、Y軸で反転させる。
+        /// </summary>
         public Texture Reversed(bool reverseX, bool reverseY)
         {
             this._reversedX = reverseX;
@@ -109,6 +125,9 @@ namespace SharpEngine
             return this;
         }
 
+        /// <summary>
+        /// 指定した短径でテクスチャを切り抜く。
+        /// </summary>
         public Texture Croped(double x, double y, double width, double height)
         {
             this._sourceRect = new Rectangle((int)x, (int)y, (int)width, (int)height);
@@ -127,6 +146,9 @@ namespace SharpEngine
             return this;
         }
 
+        /// <summary>
+        /// 指定した色でテクスチャを着色、透明度を指定, またはその両方を行う。
+        /// </summary>
         public Texture Colored(Color color, double opacity)
         {
             int alpha = Math.Clamp((int)opacity, 0, 255);
@@ -167,12 +189,18 @@ namespace SharpEngine
             return this;
         }
 
+        /// <summary>
+        /// テクスチャの描画基準点を設定する。
+        /// </summary>
         public Texture Origined(ReferencePoint refPoint)
         {
             this._referencePoint = refPoint;
             return this;
         }
 
+        /// <summary>
+        /// テクスチャのブレンドモードを設定する。
+        /// </summary>
         public Texture Blended(BlendState blendState)
         {
             this._blendState = blendState;

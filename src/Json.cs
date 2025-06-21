@@ -4,6 +4,9 @@ using ErrorEventArgs = Newtonsoft.Json.Serialization.ErrorEventArgs;
 
 namespace SharpEngine;
 
+/// <summary>
+/// Jsonファイルからオブジェクトを読み書きするクラス。
+/// </summary>
 public class Json
 {
     /// <summary>
