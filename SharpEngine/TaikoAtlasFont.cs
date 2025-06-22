@@ -10,10 +10,10 @@ namespace SharpEngine
     /// </summary>
     public class TaikoAtlasFont
     {
-        private static Texture _fontTexture;
-        private static Dictionary<int, GlyphInfo> GlyphData = new Dictionary<int, GlyphInfo>();
-        private static Dictionary<(string, double, double, bool, double), (double width, double height)> DimensionCache = new Dictionary<(string, double, double, bool, double), (double width, double height)>();
-        private static Dictionary<(string, double, Vector2?, Color?, Color?), Texture> TextCache = new();
+        private Texture _fontTexture;
+        private Dictionary<int, GlyphInfo> GlyphData = new Dictionary<int, GlyphInfo>();
+        private Dictionary<(string, double, double, bool, double), (double width, double height)> DimensionCache = new Dictionary<(string, double, double, bool, double), (double width, double height)>();
+        private Dictionary<(string, double, Vector2?, Color?, Color?), Texture> TextCache = new();
 
         public TaikoAtlasFont(string texturePath, string xmlPath)
         {
