@@ -35,6 +35,7 @@ namespace SharpEngine
             if (CurrentScene != null && CurrentScene != scene)
             {
                 CurrentScene.Disable(); // 現在のシーンを無効化
+                GC.Collect(); // ガベージコレクションを実行してメモリを解放
             }
 
             CurrentScene.Enable(); // 新しいシーンを有効化
