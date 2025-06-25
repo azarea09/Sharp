@@ -25,17 +25,17 @@ namespace SharpEngine
         /// <param name="scene">切り替えるシーン。</param>
         public void ChangeScene(Scene scene)
         {
+            if (CurrentScene != null && CurrentScene != scene)
+            {
+                CurrentScene.Disable(); // 現在のシーンを無効化
+                GC.Collect(); // ガベージコレクションを実行してメモリを解放
+            }
+
             CurrentScene = scene;
 
             if (!Scenes.Contains(scene))
             {
                 Scenes.Add(scene); // 未登録のシーンを追加
-            }
-
-            if (CurrentScene != null && CurrentScene != scene)
-            {
-                CurrentScene.Disable(); // 現在のシーンを無効化
-                GC.Collect(); // ガベージコレクションを実行してメモリを解放
             }
 
             CurrentScene.Enable(); // 新しいシーンを有効化

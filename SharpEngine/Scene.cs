@@ -55,7 +55,7 @@ namespace SharpEngine
         public virtual void Enable()
         {
             if (!Enabled) return;
-            foreach (var item in ChildScenes)
+            foreach (var item in ChildScenes.ToList())
             {
                 item.Enable();
             }
@@ -67,7 +67,9 @@ namespace SharpEngine
         public virtual void Disable()
         {
             if (!Enabled) return;
-            foreach (var item in ChildScenes)
+
+            var scenesToDisable = new List<Scene>(ChildScenes);
+            foreach (var item in scenesToDisable)
             {
                 item.Disable();
             }
