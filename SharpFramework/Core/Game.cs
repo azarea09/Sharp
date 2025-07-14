@@ -1,4 +1,6 @@
-﻿namespace SharpFramework
+﻿using SharpFramework.Internal;
+
+namespace SharpFramework.Core
 {
     /// <summary>
     /// ゲームの初期化、描画更新を行うクラス。

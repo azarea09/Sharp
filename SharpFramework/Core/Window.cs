@@ -1,6 +1,7 @@
 ﻿using Raylib_cs;
+using SharpFramework.Internal;
 
-namespace SharpFramework
+namespace SharpFramework.Core
 {
     /// <summary>
     /// ウィンドウの設定（タイトル、サイズ、外観など）を管理するクラス。

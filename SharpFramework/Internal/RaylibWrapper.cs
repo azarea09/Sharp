@@ -1,13 +1,16 @@
 ﻿using Raylib_cs;
 using SharpFramework.Audio;
-using SharpFramework.Platform.Windows;
+using SharpFramework.Core;
+using SharpFramework.Graphics;
+using SharpFramework.Internal.Platform.Windows;
 using SharpFramework.Utils;
 using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.InteropServices;
+using TTCFileSplitter;
 
 
-namespace SharpFramework
+namespace SharpFramework.Internal
 {
     internal static class RaylibWrapper
     {
@@ -55,7 +58,7 @@ namespace SharpFramework
             // レンダーサーフェス設定
             // ----------------------------
             _target = Raylib.LoadRenderTexture(RenderSurface.Width, RenderSurface.Height);
-            Raylib.SetTextureFilter(_target.Texture, TextureFilter.Bilinear);
+            Raylib.SetTextureFilter(_target.Texture, (TextureFilter)RenderSurface.Filter);
 
             // ----------------------------
             // モニターの情報取得
@@ -74,7 +77,7 @@ namespace SharpFramework
             // ----------------------------
             if (Window.DarkMode && RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                IntPtr hwnd = (nint)Raylib.GetWindowHandle();
+                nint hwnd = (nint)Raylib.GetWindowHandle();
                 DarkTitlebar.SetDarkModeTitleBar(hwnd, true);
                 DarkTitlebar.RefreshWindowLayout(hwnd);
             }
@@ -84,6 +87,14 @@ namespace SharpFramework
             // ----------------------------
             _fpsCounter.Looped += (s, e) => SetTitleWithFPS();
             _fpsCounter.Start();
+
+            // ----------------------------
+            // フォント読み込み
+            // ----------------------------
+            double scaleRatio = 1920.0 / RenderSurface.Width;
+            Sharp.DefaultFontBig = new TTFFont("SharpFramework.Resources.Fonts.NotoSansCJKjp-Regular.ttf", true, (int)Math.Ceiling(64 / scaleRatio), null, true);
+            Sharp.DefaultFontMid = new TTFFont("SharpFramework.Resources.Fonts.NotoSansCJKjp-Regular.ttf", true, (int)Math.Ceiling(36 / scaleRatio), null, true);
+            Sharp.DefaultFontSmall = new TTFFont("SharpFramework.Resources.Fonts.NotoSansCJKjp-Regular.ttf", true, (int)Math.Ceiling(26 / scaleRatio), null, true);
 
             AudioManager.Init(isWasapiExclusive);
             IsInitWindow = true;
@@ -163,8 +174,8 @@ namespace SharpFramework
         private static void CalculateRenderMode()
         {
             // 直接描画可能かどうかの判定をキャッシュ
-            _isDirectDraw = _isFullScreen &&
-                       (_monitorWidth == RenderSurface.Width && _monitorHeight == RenderSurface.Height);
+            _isDirectDraw = (_isFullScreen && _monitorWidth == RenderSurface.Width && _monitorHeight == RenderSurface.Height) ||
+                (_isFullScreen && _monitorWidth == RenderSurface.Width && _monitorHeight == RenderSurface.Height);
 
             if (!_isDirectDraw)
             {
@@ -174,10 +185,10 @@ namespace SharpFramework
 
                 _sourceRect = new Rectangle(0, 0, RenderSurface.Width, -RenderSurface.Height);
                 _destRect = new Rectangle(
-                    (Raylib.GetScreenWidth() - RenderSurface.Width * scale) * 0.5f,
-                    (Raylib.GetScreenHeight() - RenderSurface.Height * scale) * 0.5f,
-                    RenderSurface.Width * scale,
-                    RenderSurface.Height * scale
+                    (float)Math.Floor((Raylib.GetScreenWidth() - RenderSurface.Width * scale) * 0.5f),
+                    (float)Math.Floor((Raylib.GetScreenHeight() - RenderSurface.Height * scale) * 0.5f),
+                    (float)Math.Floor(RenderSurface.Width * scale),
+                    (float)Math.Floor(RenderSurface.Height * scale)
                 );
             }
         }
@@ -224,7 +235,7 @@ namespace SharpFramework
         /// </summary>
         private static void DisablePowerSavingMode()
         {
-            PowerSetActiveScheme(IntPtr.Zero, IntPtr.Zero);
+            PowerSetActiveScheme(nint.Zero, nint.Zero);
         }
 
         [DllImport("powrprof.dll", SetLastError = true)]

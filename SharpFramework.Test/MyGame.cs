@@ -1,5 +1,6 @@
 ﻿using Raylib_cs;
-using SharpFramework;
+using SharpFramework.Core;
+using SharpFramework.Graphics;
 
 namespace SharpFramework.Test
 {
@@ -11,7 +12,7 @@ namespace SharpFramework.Test
             Window.SetTitle("My Cool Game");
             Window.SetDarkMode(true);
             Window.Resize(1280, 720);
-            RenderSurface.Resize(1280, 720);
+            RenderSurface.Resize(1920, 1080);
             Sharp.SetVsync(false);
         }
 
@@ -26,8 +27,8 @@ namespace SharpFramework.Test
 
         public override void Draw()
         {
-            Raylib.DrawFPS(x, 10);
-            Raylib.DrawText("Sharp Framework!", x + 200, 10, 32, Color.Black);
+            Raylib.DrawFPS(x + 1000, 10);
+            Sharp.DrawText("Sharp Framework! うおｗｗｗｗｗｗｗｗ", 0, 0, Sharp.FontSize.Medium);
         }
 
         public override void End()

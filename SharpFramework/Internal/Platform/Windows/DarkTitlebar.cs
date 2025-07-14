@@ -1,51 +1,51 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace SharpFramework.Platform.Windows
+namespace SharpFramework.Internal.Platform.Windows
 {
     internal static class DarkTitlebar
     {
         [DllImport("dwmapi.dll")]
-        internal static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int attrValue, int attrSize);
+        internal static extern int DwmSetWindowAttribute(nint hwnd, int attr, ref int attrValue, int attrSize);
 
         [DllImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool IsWindowVisible(IntPtr hWnd);
+        private static extern bool IsWindowVisible(nint hWnd);
 
         [DllImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool IsIconic(IntPtr hWnd);
+        private static extern bool IsIconic(nint hWnd);
 
         [DllImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool IsZoomed(IntPtr hWnd);
+        private static extern bool IsZoomed(nint hWnd);
 
         [DllImport("user32.dll")]
-        private static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
+        private static extern bool GetWindowRect(nint hWnd, out RECT lpRect);
 
         [DllImport("user32.dll")]
-        private static extern bool GetWindowPlacement(IntPtr hWnd, ref WINDOWPLACEMENT lpwndpl);
+        private static extern bool GetWindowPlacement(nint hWnd, ref WINDOWPLACEMENT lpwndpl);
 
         [DllImport("user32.dll")]
-        private static extern bool SetWindowPlacement(IntPtr hWnd, [In] ref WINDOWPLACEMENT lpwndpl);
+        private static extern bool SetWindowPlacement(nint hWnd, [In] ref WINDOWPLACEMENT lpwndpl);
 
         [DllImport("user32.dll")]
-        private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+        private static extern bool ShowWindow(nint hWnd, int nCmdShow);
 
         [DllImport("user32.dll")]
-        private static extern bool LockWindowUpdate(IntPtr hWndLock);
+        private static extern bool LockWindowUpdate(nint hWndLock);
 
         [DllImport("user32.dll")]
-        private static extern IntPtr BeginDeferWindowPos(int nNumWindows);
+        private static extern nint BeginDeferWindowPos(int nNumWindows);
 
         [DllImport("user32.dll")]
-        private static extern IntPtr DeferWindowPos(IntPtr hWinPosInfo, IntPtr hWnd,
-            IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
+        private static extern nint DeferWindowPos(nint hWinPosInfo, nint hWnd,
+            nint hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
 
         [DllImport("user32.dll")]
-        private static extern bool EndDeferWindowPos(IntPtr hWinPosInfo);
+        private static extern bool EndDeferWindowPos(nint hWinPosInfo);
 
         [DllImport("user32.dll", SetLastError = true)]
-        private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter,
+        private static extern bool SetWindowPos(nint hWnd, nint hWndInsertAfter,
              int X, int Y, int cx, int cy, uint uFlags);
 
         private const int SW_SHOWNORMAL = 1;
@@ -57,7 +57,7 @@ namespace SharpFramework.Platform.Windows
         internal const int DWMWA_USE_IMMERSIVE_DARK_MODE_BEFORE_20H1 = 19;
         internal const int DWMWA_USE_IMMERSIVE_DARK_MODE = 20;
 
-        internal static void SetDarkModeTitleBar(IntPtr handle, bool enabled)
+        internal static void SetDarkModeTitleBar(nint handle, bool enabled)
         {
             if (IsWindows10OrGreater(17763))
             {
@@ -72,7 +72,7 @@ namespace SharpFramework.Platform.Windows
             }
         }
 
-        internal static void RefreshWindowLayout(IntPtr hwnd)
+        internal static void RefreshWindowLayout(nint hwnd)
         {
             if (IsWindowVisible(hwnd) && !IsIconic(hwnd))
             {
@@ -92,7 +92,7 @@ namespace SharpFramework.Platform.Windows
                         LockWindowUpdate(hwnd);
                         ShowWindow(hwnd, SW_SHOWNORMAL);
                         ShowWindow(hwnd, SW_SHOWMAXIMIZED);
-                        LockWindowUpdate(IntPtr.Zero);
+                        LockWindowUpdate(nint.Zero);
 
                         placement.rcNormalPosition = oldRect;
                         SetWindowPlacement(hwnd, ref placement);
@@ -104,11 +104,11 @@ namespace SharpFramework.Platform.Windows
                     int height = rect.Bottom - rect.Top;
 
                     // 一時的に幅を -1 して再適用
-                    SetWindowPos(hwnd, IntPtr.Zero, 0, 0, width - 1, height,
+                    SetWindowPos(hwnd, nint.Zero, 0, 0, width - 1, height,
                         SWP_NOZORDER | SWP_NOMOVE | SWP_NOACTIVATE);
 
                     // 元の幅に戻す
-                    SetWindowPos(hwnd, IntPtr.Zero, 0, 0, width, height,
+                    SetWindowPos(hwnd, nint.Zero, 0, 0, width, height,
                         SWP_NOZORDER | SWP_NOMOVE | SWP_NOACTIVATE);
                 }
             }
