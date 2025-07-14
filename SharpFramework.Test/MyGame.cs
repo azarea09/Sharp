@@ -9,9 +9,9 @@ namespace SharpFramework.Test
         public override void Init()
         {
             Window.SetTitle("My Cool Game");
-            Window.SetDrakMode(true);
+            Window.SetDarkMode(true);
             Window.Resize(1280, 720);
-            RenderSurface.Resize(1280, 72);
+            RenderSurface.Resize(1280, 720);
             Sharp.SetVsync(false);
         }
 
@@ -26,9 +26,13 @@ namespace SharpFramework.Test
 
         public override void Draw()
         {
-            Raylib.ClearBackground(Color.RayWhite);
             Raylib.DrawFPS(x, 10);
             Raylib.DrawText("Sharp Framework!", x + 200, 10, 32, Color.Black);
+        }
+
+        public override void End()
+        {
+            
         }
     }
 }

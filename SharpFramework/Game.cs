@@ -8,6 +8,7 @@
         public abstract void Init();
         public abstract void Update();
         public abstract void Draw();
+        public abstract void End();
         public void Run()
         {
             Init();
@@ -20,6 +21,7 @@
                 RaylibWrapper.Draw(Draw);
             }
 
+            End();
             RaylibWrapper.End();
         }
     }

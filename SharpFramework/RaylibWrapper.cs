@@ -5,7 +5,6 @@ using SharpFramework.Utils;
 using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.InteropServices;
-using Un4seen.Bass.Misc;
 
 
 namespace SharpFramework
@@ -20,6 +19,11 @@ namespace SharpFramework
         private static int _monitorWidth; // モニターのサイズ
         private static int _monitorHeight;
         private static Counter _fpsCounter = new(0, 1, 1000, true); // 1000msごとに1回更新
+
+        // キャッシュ用変数
+        private static bool _isDirectDraw = false;
+        private static Rectangle _sourceRect;
+        private static Rectangle _destRect;
 
         internal unsafe static void Init(bool isWasapiExclusive = false)
         {
@@ -36,16 +40,16 @@ namespace SharpFramework
             {
                 Raylib.SetWindowState(ConfigFlags.ResizableWindow);
             }
-            if (Sharp.FrameLimit > 0)
+            if (Sharp.TargetFrameRate > 0)
             {
-                Raylib.SetTargetFPS(Sharp.FrameLimit);
+                Raylib.SetTargetFPS(Sharp.TargetFrameRate);
             }
             if (Sharp.Vsync)
             {
                 Raylib.SetWindowState(ConfigFlags.VSyncHint);
             }
 
-            Raylib.InitWindow(Window.Width, Window.Height, $"{Window.Title} | FPS {Raylib.GetFPS()} | W {Window.Width}x{Window.Height} | RS {RenderSurface.Width}x{RenderSurface.Height}");
+            Raylib.InitWindow(Window.Width + 1, Window.Height, $"{Window.Title} | FPS {Raylib.GetFPS()} | W {Window.Width}x{Window.Height} | RS {RenderSurface.Width}x{RenderSurface.Height}");
 
             // ----------------------------
             // レンダーサーフェス設定
@@ -61,9 +65,14 @@ namespace SharpFramework
             _monitorHeight = Raylib.GetMonitorHeight(monitor);
 
             // ----------------------------
+            // 描画モードを事前計算
+            // ----------------------------
+            CalculateRenderMode();
+
+            // ----------------------------
             // ダークモード適応 
             // ----------------------------
-            if (Window.IsDrakMode && RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            if (Window.DarkMode && RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 IntPtr hwnd = (nint)Raylib.GetWindowHandle();
                 DarkTitlebar.SetDarkModeTitleBar(hwnd, true);
@@ -100,6 +109,7 @@ namespace SharpFramework
             {
                 Window.Resize(Raylib.GetScreenWidth(), Raylib.GetScreenHeight());
                 SetTitleWithFPS();
+                CalculateRenderMode();
             }
 
             // ----------------------------
@@ -117,22 +127,22 @@ namespace SharpFramework
             // ゲームの基本解像度とモニターのサイズが一緒かつ、フルスクリーンの場合は仮想画面を使わずに直接描画する。
             // それ以外の場合は仮想画面に一旦描画してからスケーリングしてウィンドウに描画する。
             // ----------------------------
-            if (_isFullScreen && (_monitorWidth == RenderSurface.Width && _monitorHeight == RenderSurface.Height))
+            if (_isDirectDraw)
             {
                 Raylib.BeginDrawing();
-                Raylib.ClearBackground(Color.Black);
+                Raylib.ClearBackground(Sharp.BackGroundColor);
                 drawAction?.Invoke();
                 Raylib.EndDrawing();
             }
             else
             {
                 Raylib.BeginTextureMode(_target);
-                Raylib.ClearBackground(Color.Black);
+                Raylib.ClearBackground(Sharp.BackGroundColor);
                 drawAction?.Invoke();
                 Raylib.EndTextureMode();
 
                 Raylib.BeginDrawing();
-                DrawWindow(_target);
+                DrawWindow();
                 Raylib.EndDrawing();
             }
         }
@@ -146,23 +156,39 @@ namespace SharpFramework
         }
 
         #region [private]
+
+        /// <summary>
+        /// 描画モードを事前計算してキャッシュします。
+        /// </summary>
+        private static void CalculateRenderMode()
+        {
+            // 直接描画可能かどうかの判定をキャッシュ
+            _isDirectDraw = _isFullScreen &&
+                       (_monitorWidth == RenderSurface.Width && _monitorHeight == RenderSurface.Height);
+
+            if (!_isDirectDraw)
+            {
+                // スケーリング描画用の値を事前計算
+                float scale = Math.Min((float)Raylib.GetScreenWidth() / RenderSurface.Width,
+                                (float)Raylib.GetScreenHeight() / RenderSurface.Height);
+
+                _sourceRect = new Rectangle(0, 0, RenderSurface.Width, -RenderSurface.Height);
+                _destRect = new Rectangle(
+                    (Raylib.GetScreenWidth() - RenderSurface.Width * scale) * 0.5f,
+                    (Raylib.GetScreenHeight() - RenderSurface.Height * scale) * 0.5f,
+                    RenderSurface.Width * scale,
+                    RenderSurface.Height * scale
+                );
+            }
+        }
+
         /// <summary>
         /// 仮想画面を実画面に描画します。
         /// </summary>
-        private static void DrawWindow(RenderTexture2D target)
+        private static void DrawWindow()
         {
-            float scale = Math.Min((float)Raylib.GetScreenWidth() / RenderSurface.Width, (float)Raylib.GetScreenHeight() / RenderSurface.Height);
-
-            Rectangle source = new Rectangle(0, 0, RenderSurface.Width, -RenderSurface.Height); // 上下反転
-            Rectangle dest = new Rectangle(
-                (Raylib.GetScreenWidth() - RenderSurface.Width * scale) * 0.5f,
-                (Raylib.GetScreenHeight() - RenderSurface.Height * scale) * 0.5f,
-                RenderSurface.Width * scale,
-                RenderSurface.Height * scale
-            );
-
             Rlgl.SetBlendMode(BlendMode.Alpha);
-            Raylib.DrawTexturePro(target.Texture, source, dest, Vector2.Zero, 0, Color.White);
+            Raylib.DrawTexturePro(_target.Texture, _sourceRect, _destRect, Vector2.Zero, 0, Color.White);
         }
 
         /// <summary>
@@ -182,6 +208,7 @@ namespace SharpFramework
             }
 
             _isFullScreen = !_isFullScreen;
+            CalculateRenderMode();
         }
 
         /// <summary>
@@ -206,7 +233,7 @@ namespace SharpFramework
 
         private static void SetTitleWithFPS()
         {
-             Raylib.SetWindowTitle($"{Window.Title} | FPS {Raylib.GetFPS()} | W {Window.Width}x{Window.Height} | RS {RenderSurface.Width}x{RenderSurface.Height}");
+            Raylib.SetWindowTitle($"{Window.Title} | FPS {Raylib.GetFPS()} | W {Window.Width}x{Window.Height} | RS {RenderSurface.Width}x{RenderSurface.Height}");
         }
         #endregion
     }
