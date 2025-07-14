@@ -7,7 +7,6 @@ using SharpFramework.Utils;
 using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.InteropServices;
-using TTCFileSplitter;
 
 
 namespace SharpFramework.Internal

@@ -24,7 +24,6 @@
 	<ItemGroup>
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 		<PackageReference Include="Raylib-cs" Version="7.0.1" />
-		<PackageReference Include="TTCFileSplitter" Version="1.0.1" />
 		<Reference Include="Bass.Net">
 			<HintPath>..\ThirdParty\Bass.Net.dll</HintPath>
 			<Private>true</Private>
