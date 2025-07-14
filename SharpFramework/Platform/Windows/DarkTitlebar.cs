@@ -44,6 +44,10 @@ namespace SharpFramework.Platform.Windows
         [DllImport("user32.dll")]
         private static extern bool EndDeferWindowPos(IntPtr hWinPosInfo);
 
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter,
+             int X, int Y, int cx, int cy, uint uFlags);
+
         private const int SW_SHOWNORMAL = 1;
         private const int SW_SHOWMAXIMIZED = 3;
         private const uint SWP_NOZORDER = 0x0004;
@@ -99,17 +103,17 @@ namespace SharpFramework.Platform.Windows
                     int width = rect.Right - rect.Left;
                     int height = rect.Bottom - rect.Top;
 
-                    IntPtr defer = BeginDeferWindowPos(2);
-                    defer = DeferWindowPos(defer, hwnd, IntPtr.Zero, 0, 0,
-                        width - 1, height, SWP_NOZORDER | SWP_NOMOVE | SWP_NOACTIVATE);
-                    defer = DeferWindowPos(defer, hwnd, IntPtr.Zero, 0, 0,
-                        width, height, SWP_NOZORDER | SWP_NOMOVE | SWP_NOACTIVATE);
-                    LockWindowUpdate(hwnd);
-                    EndDeferWindowPos(defer);
-                    LockWindowUpdate(IntPtr.Zero);
+                    // 一時的に幅を -1 して再適用
+                    SetWindowPos(hwnd, IntPtr.Zero, 0, 0, width - 1, height,
+                        SWP_NOZORDER | SWP_NOMOVE | SWP_NOACTIVATE);
+
+                    // 元の幅に戻す
+                    SetWindowPos(hwnd, IntPtr.Zero, 0, 0, width, height,
+                        SWP_NOZORDER | SWP_NOMOVE | SWP_NOACTIVATE);
                 }
             }
         }
+
 
         internal static bool IsWindows10OrGreater(int build = -1)
         {

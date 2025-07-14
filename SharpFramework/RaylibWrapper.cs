@@ -49,7 +49,7 @@ namespace SharpFramework
                 Raylib.SetWindowState(ConfigFlags.VSyncHint);
             }
 
-            Raylib.InitWindow(Window.Width + 1, Window.Height, $"{Window.Title} | FPS {Raylib.GetFPS()} | W {Window.Width}x{Window.Height} | RS {RenderSurface.Width}x{RenderSurface.Height}");
+            Raylib.InitWindow(Window.Width, Window.Height, $"{Window.Title} | FPS {Raylib.GetFPS()} | W {Window.Width}x{Window.Height} | RS {RenderSurface.Width}x{RenderSurface.Height}");
 
             // ----------------------------
             // レンダーサーフェス設定

@@ -20,6 +20,7 @@ namespace SharpFramework.Utils
             Begin = begin;
             End = end;
             Interval = interval;
+            IntervalInSeconds = interval / 1000.0;
             Value = begin;
             IsLoop = isLoop;
             State = TimerState.Stopped;
@@ -45,7 +46,7 @@ namespace SharpFramework.Utils
             // 現在時間から以前Tick()したまでの時間の差
             var diffTime = nowTime - NowTime;
 
-            while (diffTime >= Interval / 1000.0)
+            while (diffTime >= IntervalInSeconds)
             {
                 // 時間の差が間隔未満になるまで進める
                 Value++;
@@ -66,7 +67,7 @@ namespace SharpFramework.Utils
                         Ended?.Invoke(this, EventArgs.Empty);
                     }
                 }
-                diffTime -= (float)(Interval / 1000.0);
+                diffTime -= IntervalInSeconds;
             }
             // 余ったdiffTimeを引いて、次Tick()したときにちゃんとなるように
             NowTime = nowTime - diffTime;
@@ -124,6 +125,7 @@ namespace SharpFramework.Utils
             Tick();
             // 間隔を更新する。
             Interval = interval;
+            IntervalInSeconds = interval / 1000.0;
             // 間隔更新後、あまりがあるかもしれないのでもう一度カウンター値を更新する。
             Tick();
         }
@@ -180,9 +182,14 @@ namespace SharpFramework.Utils
         public double End { get; private set; }
 
         /// <summary>
-        /// タイマー間隔。
+        /// タイマー間隔 (ミリ秒)。
         /// </summary>
         public double Interval { get; private set; }
+
+        /// <summary>
+        /// タイマー間隔（秒。
+        /// </summary>
+        private double IntervalInSeconds;
 
         /// <summary>
         /// カウンターの現在の値。
