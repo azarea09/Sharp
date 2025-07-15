@@ -32,7 +32,7 @@
         /// <summary>
         /// 補完なし。拡縮した際にジャギーが出ることがあります。
         /// </summary>
-        Point = 0,
+        Point,
 
         /// <summary>
         /// リニア補完
@@ -42,21 +42,6 @@
         /// <summary>
         /// トライリニア補完
         /// </summary>
-        Trilinear,
-
-        /// <summary>
-        /// Anisotropic filtering 4x
-        /// </summary>
-        Anisotropic4X,
-
-        /// <summary>
-        /// Anisotropic filtering 8x
-        /// </summary>
-        Anisotropic8X,
-
-        /// <summary>
-        /// Anisotropic filtering 16x
-        /// </summary>
-        Anisotropic16X,
+        Trilinear
     }
 }
