@@ -137,7 +137,7 @@ namespace SharpFramework.Internal
             // ゲームの基本解像度とモニターのサイズが一緒かつ、フルスクリーンの場合は仮想画面を使わずに直接描画する。
             // それ以外の場合は仮想画面に一旦描画してからスケーリングしてウィンドウに描画する。
             // ----------------------------
-            if (_isDirectDraw)
+            if (_isDirectDraw || !RenderSurface.UseRenderSurface)
             {
                 Raylib.BeginDrawing();
                 Raylib.ClearBackground(Sharp.BackGroundColor);

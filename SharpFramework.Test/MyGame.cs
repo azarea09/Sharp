@@ -12,6 +12,7 @@ namespace SharpFramework.Test
             Window.SetDarkMode(true);
             Window.Resize(1280, 720);
             RenderSurface.Resize(1920, 1080);
+            RenderSurface.SetUseRenderSurface(false);
             Sharp.SetVsync(false);
         }
 

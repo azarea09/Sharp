@@ -8,6 +8,12 @@
         public static int Width = 1920;
         public static int Height = 1080;
         public static RenderSurfaceFilter Filter = RenderSurfaceFilter.Bilinear;
+        public static bool UseRenderSurface = true;
+
+        public static void SetUseRenderSurface(bool useRenderSurface)
+        {
+            UseRenderSurface = useRenderSurface;
+        }
 
         /// <summary>
         /// 指定したサイズの解像度に設定します。
