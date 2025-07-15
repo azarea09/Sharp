@@ -13,6 +13,8 @@
         public static void SetUseRenderSurface(bool useRenderSurface)
         {
             UseRenderSurface = useRenderSurface;
+            Width = Window.Width;
+            Height = Window.Height;
         }
 
         /// <summary>

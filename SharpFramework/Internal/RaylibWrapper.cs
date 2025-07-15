@@ -118,6 +118,9 @@ namespace SharpFramework.Internal
             if (Raylib.IsWindowResized())
             {
                 Window.Resize(Raylib.GetScreenWidth(), Raylib.GetScreenHeight());
+                if (!RenderSurface.UseRenderSurface)
+                    RenderSurface.Resize(Raylib.GetScreenWidth(), Raylib.GetScreenHeight());
+
                 SetTitleWithFPS();
                 CalculateRenderMode();
             }
